@@ -1,0 +1,32 @@
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <!-- // real name, hero name, publisher, first appearance date, list of abilities / powers and list of team affiliations -->
+    
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Real Name</th>
+                <th scope="col">Hero Name</th>
+                <th scope="col">Publisher</th>
+                <th scope="col">First Appearance</th>
+                <th scope="col">Abilities / Powers</th>
+                <th scope="col">Team Affiliations</th>
+    
+            </tr>
+        </thead>
+        <tbody>
+            @for (hero of heros; track hero.id; let i = $index) {
+                <tr (click)="goToDetails(hero)">
+                    <th scope="row">{{ i + 1 }}</th>
+                    <td>{{ hero.realName }}</td>
+                    <td>{{ hero.name }}</td>
+                    <td>{{ hero.publisher }}</td>
+                    <td>{{ hero.firstAppearance }}</td>
+                    <td>{{ hero.abilities }}</td>
+                    <td>{{ hero.teamAffiliations }}</td>
+    
+                </tr>
+            }
+        </tbody>
+    </table>    
+</div>
