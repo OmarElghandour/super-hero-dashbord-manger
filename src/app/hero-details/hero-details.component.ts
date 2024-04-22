@@ -2,7 +2,9 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Hero } from '../models/hero.modle';
+import { HeroesService } from '../heroes/heroes.service';
 
 @Component({
   selector: 'app-hero-details',
@@ -11,15 +13,20 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class HeroDetailsComponent implements OnInit {
   // hero: Hero;
-  heroForm: FormGroup;
+  heroForm: FormGroup;  
+  heroId: any;
+  hero!: Hero;
+  // router: Router;
 
   constructor(
     private route: ActivatedRoute,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private heroService: HeroesService,
+    private router: Router
   ) 
   { 
     this.heroForm = this.fb.group({
-      realName: ['', Validators.required],
+      name: ['', Validators.required],
       heroName: ['', Validators.required],
       publisher: ['', Validators.required],
       firstAppearanceDate: ['', Validators.required],
@@ -28,20 +35,26 @@ export class HeroDetailsComponent implements OnInit {
       ]), 
       teamAffiliations: this.fb.array([
         this.fb.control('')
-      ]) 
+      ]),
+      powers: this.fb.array([
+        this.fb.control('')
+      ]),
     });
   }
 
   ngOnInit(): void {
+    this.heroId = this.route.snapshot.paramMap.get('id');
 
+    if(this.heroId === '_new_') {
+      return;
+    }
 
-
-    // this.route.paramMap.subscribe(params => {
-    //   const heroId = +.get('id'); // Get hero id from route parameters
-    //   // Here you can fetch the hero data based on the id from your service or HEROES array
-    //   // For simplicity, let's assume HEROES is available globally
-    //   this.hero = HERparamsOES.find(hero => hero.id === heroId);
-    // });
+    this.heroService.get(this.heroId).subscribe((hero: Hero) => {
+      this.hero = hero;
+      this.updateFormSingleValues();
+      this.updateFormArrayValues();
+    });
+    
   }
 
 
@@ -49,18 +62,22 @@ export class HeroDetailsComponent implements OnInit {
     return this.heroForm.get('teamAffiliations') as FormArray;
   }
 
+  
+  get getAbilities() {
+    return this.heroForm.get('abilities') as FormArray;
+  }
+
+
+  get getPowers() {
+    return this.heroForm.get('powers') as FormArray;
+  }
+  
   addTeamAffiliation(): void {
     this.getTeamAffiliations.push(this.fb.control(''));
   }
 
   removeTeamAffiliation(index: number): void {
     this.getTeamAffiliations.removeAt(index);
-  }
-
-
-
-  get getAbilities() {
-    return this.heroForm.get('abilities') as FormArray;
   }
 
   addAbility(): void {
@@ -71,13 +88,69 @@ export class HeroDetailsComponent implements OnInit {
     this.getAbilities.removeAt(index);
   }
 
+  addPower(): void {
+    this.getPowers.push(this.fb.control(''));
+  }
 
+  removePower(index: number): void {
+    this.getPowers.removeAt(index);
+  }
+
+  /**
+   * Update the form values with the hero values
+   * 
+   * @returns void
+   */
+  updateFormSingleValues(){
+    this.heroForm.patchValue({
+      name: this.hero.name,
+      heroName: this.hero.heroName,
+      publisher: this.hero.publisher,
+      firstAppearanceDate: this.hero.firstAppearance
+    })
+  }
+
+  /**
+   * Update the form values with the hero values
+   * 
+   * @returns void
+   */
+  updateFormArrayValues(){
+    this.hero.abilities?.forEach((ability) => {
+      if(ability) {
+        this.getAbilities.push(this.fb.control(ability))
+      };
+    });
+    
+    this.hero.teamAffiliations?.forEach((affiliation) => {
+      if(affiliation) {
+        this.getTeamAffiliations.push(this.fb.control(affiliation))
+      }
+    });
+
+    this.hero.powers?.forEach((power) => {
+      if(power) {
+        this.getPowers.push(this.fb.control(power));
+      }
+    });
+  }
+
+  createHero(): void {
+    this.heroService.create(this.heroForm.value).subscribe(() => {});
+  }
   onSubmit(): void {
     if (this.heroForm.valid) {
-      // Process form data
-      console.log(this.heroForm.value);
+
+      if(this.heroId !== '_new_') {
+        this.heroService.update(this.heroForm.value, this.heroId).subscribe((hero) => {
+          console.log(hero);
+        });
+      }else {
+        this.createHero();
+      }
+
+      this.router.navigate(['/']);
     } else {
-      // Handle form validation errors
       console.error('Form is invalid');
     }
   }

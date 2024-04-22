@@ -2,7 +2,7 @@
   export interface Hero {
     id: number;
     name: string;
-    realName: string;
+    heroName: string;
     publisher: string;
     firstAppearance: number;
     abilities: string[];

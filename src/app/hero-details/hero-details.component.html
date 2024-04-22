@@ -1,8 +1,8 @@
 <div class="container mx-auto mt-16 p-40">
   <form [formGroup]="heroForm" (ngSubmit)="onSubmit()" class="mt-8 p-8 bg-white shadow-md rounded-lg">
     <div class="mb-8 border-b border-gray-300 pb-4">
-      <label for="realName" class="block text-gray-700 font-bold mb-2">Real Name:</label>
-      <input type="text" class="form-input w-full" formControlName="realName" placeholder="Enter real name...">
+      <label for="name" class="block text-gray-700 font-bold mb-2">Real Name:</label>
+      <input type="text" class="form-input w-full" formControlName="name" placeholder="Enter real name...">
     </div>
     <div class="mb-8 border-b border-gray-300 pb-4">
       <label for="heroName" class="block text-gray-700 font-bold mb-2">Hero Name:</label>
@@ -35,7 +35,20 @@
       <button type="button" class="btn btn-blue" (click)="addTeamAffiliation()">Add Affiliation</button>
     </div>
 
-    <button type="submit" class="btn btn-green mt-4">Create Hero</button>
+    <div formArrayName="powers" class="mb-8 border-b border-gray-300 pb-4">
+      <label for="powers" class="block text-gray-700 font-bold mb-2">Powers:</label>
+      <div *ngFor="let power of getPowers.controls; let i = index" class="flex items-center mb-2">
+        <input type="text" class="form-input w-2/3 mr-2" [formControlName]="i" placeholder="Enter power...">
+        <button type="button" class="btn btn-red" (click)="removePower(i)">Remove</button>
+      </div>
+      <button type="button" class="btn btn-blue" (click)="addPower()">Add Power</button>
+    </div>
+
+    <button type="submit" class="btn btn-green mt-4 btn-blue">
+      {{ heroId === '_new_' ? 'Create' : 'Update'}} Hero
+    </button>
+
+
   </form>
 </div>
 
